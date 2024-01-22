@@ -1,4 +1,4 @@
-CORE := iob_soc_sut
+CORE := iob_soc_caravel
 BOARD ?= AES-KU040-DB-G
 
 # Disable Linter while rules are not finished
