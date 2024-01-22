@@ -6,8 +6,6 @@ import build_srcs
 
 from iob_soc import iob_soc
 from iob_regfileif import iob_regfileif
-from iob_gpio import iob_gpio
-from iob_eth import iob_eth
 from iob_ram_2p_be import iob_ram_2p_be
 from verilog_tools import insert_verilog_in_module
 from mk_configuration import append_str_config_build_mk
@@ -79,8 +77,6 @@ class iob_soc_sut(iob_soc):
         super()._create_submodules_list(
             [
                 iob_regfileif_custom,
-                iob_gpio,
-                iob_eth,
                 # Modules required for AXISTREAM
                 (iob_ram_2p_be, {"purpose": "simulation"}),
                 (iob_ram_2p_be, {"purpose": "fpga"}),
@@ -101,21 +97,6 @@ class iob_soc_sut(iob_soc):
                 },
             )
         )
-        cls.peripherals.append(iob_gpio("GPIO0", "GPIO interface"))
-        cls.peripherals.append(
-            iob_eth(
-                "ETH0",
-                "Ethernet interface",
-                parameters={
-                    "AXI_ID_W": "AXI_ID_W",
-                    "AXI_LEN_W": "AXI_LEN_W",
-                    "AXI_ADDR_W": "AXI_ADDR_W",
-                    "AXI_DATA_W": "AXI_DATA_W",
-                    "MEM_ADDR_OFFSET": "MEM_ADDR_OFFSET",
-                },
-            )
-        )
-
         cls.peripheral_portmap += [
             (  # Map REGFILEIF0 to external interface
                 {
@@ -133,204 +114,7 @@ class iob_soc_sut(iob_soc):
                     "remove_string_from_port_names": "external_",  # Remove this string from the port names of the external IO
                 },
             ),
-            # ETHERNET
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "general",
-                    "port": "inta_o",
-                    "bits": [],
-                },
-                {
-                    "corename": "internal",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            # phy - connect to external interface
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MTxClk",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MTxD",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MTxEn",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MTxErr",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MRxClk",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MRxDv",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MRxD",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MRxErr",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MColl",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MCrS",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MDC",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "MDIO",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
-            (
-                {
-                    "corename": "ETH0",
-                    "if_name": "phy",
-                    "port": "phy_rstn_o",
-                    "bits": [],
-                },
-                {
-                    "corename": "external",
-                    "if_name": "ETH0",
-                    "port": "",
-                    "bits": [],
-                },
-            ),
+            
         ]
 
         # Run IOb-SoC setup
