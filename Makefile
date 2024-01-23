@@ -4,9 +4,9 @@ BOARD ?= AES-KU040-DB-G
 # Disable Linter while rules are not finished
 DISABLE_LINT:=1
 
-ifeq ($(TESTER),1)
-TOP_MODULE_NAME :=iob_soc_tester
-endif
+#ifeq ($(TESTER),1)
+#TOP_MODULE_NAME :=iob_soc_tester
+#endif
 ifneq ($(USE_EXTMEM),1)
 $(warning WARNING: USE_EXTMEM must be set to support iob-soc-opencryptolinux and ethernet with DMA. Auto-adding USE_EXTMEM=1...)
 USE_EXTMEM:=1
