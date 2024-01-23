@@ -15,6 +15,9 @@ endif
 LIB_DIR:=submodules/IOBSOC/submodules/LIB
 include $(LIB_DIR)/setup.mk
 
+CARAVEL_LIB := scripts
+PYTHON_EXEC:=/usr/bin/env python3 -B
+
 INIT_MEM ?= 1
 RUN_LINUX ?= 0
 
@@ -40,6 +43,9 @@ endif
 
 setup:
 	make build-setup SETUP_ARGS="$(SETUP_ARGS)"
+
+setup_caravel: build_dir_name
+	$(PYTHON_EXEC) ./$(CARAVEL_LIB)/caravel_setup.py $(BUILD_DIR)
 
 pc-emul-run: build_dir_name
 	make clean setup && make -C $(BUILD_DIR)/ pc-emul-run
