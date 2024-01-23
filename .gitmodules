@@ -7,3 +7,6 @@
 [submodule "submodules/CARAVEL"]
 	path = submodules/CARAVEL
 	url = git@github.com:IObundle/caravel_project.git
+[submodule "submodules/OSAD"]
+	path = submodules/OSAD
+	url = git@github.com:Vasco-Luz/OSAD.git
