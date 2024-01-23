@@ -212,4 +212,4 @@ jobs:
           ssh-key: ${{ secrets.IOB_GHACTIONS }}
           submodules: 'recursive'
       - name: doc test
-        run: nix-shell --run "make clean setup && make -C ../iob_soc_sut_V* doc-test"
+        run: nix-shell --run "make clean setup && make -C ../iob_soc_caravel_V* doc-test"
