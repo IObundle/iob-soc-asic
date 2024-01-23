@@ -218,14 +218,6 @@ endif
                     "max": "32",
                     "descr": "SRAM address width",
                 },
-                {
-                    "name": "USE_ETHERNET",
-                    "type": "M",
-                    "val": True,
-                    "min": "0",
-                    "max": "1",
-                    "descr": "Enable ethernet support.",
-                },
             ]
         )
 
