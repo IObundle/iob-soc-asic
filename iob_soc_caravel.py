@@ -202,7 +202,7 @@ endif
                     "min": "1",
                     "max": "32",
                     "descr": "SRAM address width",
-                },GPIO
+                }
             ]
         )
 
