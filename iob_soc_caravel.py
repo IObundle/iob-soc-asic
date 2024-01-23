@@ -127,9 +127,6 @@ class iob_soc_caravel(iob_soc):
         # Connect unused peripheral inputs
         insert_verilog_in_module(
             """
-    assign AXISTREAMIN0_tready_i = 1'b0;
-    assign AXISTRREAMOUT0_tvalid_i = 1'b0;
-    assign AXISTRREAMOUT0_tdata_i = 1'b0;
              """,
             cls.build_dir + "/hardware/src/iob_soc_caravel.v",
         )
@@ -138,8 +135,6 @@ class iob_soc_caravel(iob_soc):
             insert_verilog_in_module(
                 """
 `include "iob_regfileif_inverted_swreg_def.vh"
-
-   assign GPIO0_input_ports = `IOB_SOC_caravel_GPIO0_GPIO_W'h0;
    wire [1-1:0] iob_valid_i = 1'b0;
    wire [`IOB_SOC_CARAVEL_REGFILEIF0_ADDR_W-1:0] iob_addr_i = `IOB_SOC_CARAVEL_REGFILEIF0_ADDR_W'h0;
    wire [`IOB_SOC_CARAVEL_REGFILEIF0_DATA_W-1:0] iob_wdata_i = `IOB_SOC_CARAVEL_REGFILEIF0_DATA_W'h0;
