@@ -140,16 +140,6 @@ class iob_soc_caravel(iob_soc):
 `include "iob_regfileif_inverted_swreg_def.vh"
 
    assign GPIO0_input_ports = `IOB_SOC_caravel_GPIO0_GPIO_W'h0;
-   assign AXISTREAMIN0_axis_clk_i = clk_i;
-   assign AXISTREAMIN0_axis_cke_i = 1'b1;
-   assign AXISTREAMIN0_axis_arst_i = arst_i;
-   assign AXISTREAMIN0_axis_tvalid_i = 1'b0;
-   assign AXISTREAMIN0_axis_tdata_i = {`IOB_SOC_caravel_AXISTREAMIN0_TDATA_W{1'b0}};
-   assign AXISTREAMIN0_axis_tlast_i = 1'b0;
-   assign AXISTREAMOUT0_axis_clk_i = clk_i;
-   assign AXISTREAMOUT0_axis_cke_i = 1'b1;
-   assign AXISTREAMOUT0_axis_arst_i = arst_i;
-   assign AXISTREAMOUT0_axis_tready_i = 1'b0;
    wire [1-1:0] iob_valid_i = 1'b0;
    wire [`IOB_SOC_CARAVEL_REGFILEIF0_ADDR_W-1:0] iob_addr_i = `IOB_SOC_CARAVEL_REGFILEIF0_ADDR_W'h0;
    wire [`IOB_SOC_CARAVEL_REGFILEIF0_DATA_W-1:0] iob_wdata_i = `IOB_SOC_CARAVEL_REGFILEIF0_DATA_W'h0;
@@ -217,7 +207,7 @@ endif
                     "min": "1",
                     "max": "32",
                     "descr": "SRAM address width",
-                },
+                },GPIO
             ]
         )
 
