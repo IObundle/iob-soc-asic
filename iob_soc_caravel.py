@@ -6,6 +6,7 @@ import build_srcs
 
 from iob_soc import iob_soc
 from iob_regfileif import iob_regfileif
+from iob_wishbone2iob import iob_wishbone2iob
 from iob_ram_2p_be import iob_ram_2p_be
 from verilog_tools import insert_verilog_in_module
 from mk_configuration import append_str_config_build_mk
@@ -77,11 +78,13 @@ class iob_soc_caravel(iob_soc):
         super()._create_submodules_list(
             [
                 iob_regfileif_custom,
+                iob_wishbone2iob,
                 # Modules required for AXISTREAM
                 (iob_ram_2p_be, {"purpose": "simulation"}),
                 (iob_ram_2p_be, {"purpose": "fpga"}),
             ]
         )
+
     @classmethod
     def _specific_setup(cls):
         """Method that runs the setup process of this class"""
@@ -113,7 +116,6 @@ class iob_soc_caravel(iob_soc):
                     "remove_string_from_port_names": "external_",  # Remove this string from the port names of the external IO
                 },
             ),
-            
         ]
 
         # Run IOb-SoC setup
@@ -123,7 +125,9 @@ class iob_soc_caravel(iob_soc):
     def _generate_files(cls):
         super()._generate_files()
         # Remove iob_soc_caravel_swreg_gen.v as it is not used
-        os.remove(os.path.join(cls.build_dir, "hardware/src/iob_soc_caravel_swreg_gen.v"))
+        os.remove(
+            os.path.join(cls.build_dir, "hardware/src/iob_soc_caravel_swreg_gen.v")
+        )
         # Connect unused peripheral inputs
         insert_verilog_in_module(
             """
@@ -202,7 +206,7 @@ endif
                     "min": "1",
                     "max": "32",
                     "descr": "SRAM address width",
-                }
+                },
             ]
         )
 
