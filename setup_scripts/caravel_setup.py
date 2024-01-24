@@ -23,7 +23,7 @@ def find_module_instantiations(verilog_file_path):
     return list(module_names)
 
 
-def find_includes(file_path):
+def find_includes_vh(file_path):
     with open(file_path, "r") as file:
         verilog_code = file.read()
         include_pattern = re.compile(r'`include\s+"([^"]+)"')
@@ -31,7 +31,7 @@ def find_includes(file_path):
         return matches
 
 
-def search_algoritm(
+def search_file_iname(
     start_dir, name
 ):  # a simple search algorithm that does not enter the .git folder
     for foldername, subfolders, filenames in os.walk(start_dir):
@@ -52,8 +52,10 @@ else:
 
 build_dir_caravel_path = None
 current_dir = os.getcwd()  # gets current directory
-CARAVEL_source_path = search_algoritm(current_dir, "CARAVEL")  # gets the submodule path
-build_dir_path = search_algoritm(
+CARAVEL_source_path = search_file_iname(
+    current_dir, "CARAVEL"
+)  # gets the submodule path
+build_dir_path = search_file_iname(
     os.path.dirname(current_dir), os.path.basename(build_dir_name)
 )  # gets the full path to the build dir
 if os.path.exists(str(build_dir_path)):
@@ -78,14 +80,77 @@ if os.path.exists(str(build_dir_path)):
         print(f"Error: {e}")
     except OSError as e:
         print(f"Error: {e}")
-    Top_path = search_algoritm(current_dir, "iob_soc_caravel.v")  # gets the top_module
-    source_path_caravel = os.path.dirname(
-        search_algoritm(build_dir_caravel_path, "user_project_wrapper.v")
+    Top_path = search_file_iname(
+        current_dir, "iob_soc_caravel.v"
+    )  # gets the top_module
+    source_path_caravel = os.path.join(
+        os.path.dirname(search_file_iname(build_dir_caravel_path, "defines.v")),
+        "iob_soc_caravel.v",
     )
-    open_lane_dir = search_algoritm(build_dir_caravel_path, "openlane")
-    user_proj_example_dir = search_algoritm(build_dir_caravel_path, "user_proj_example")
-    print(open_lane_dir)
-    print(user_proj_example_dir)
+    open_lane_dir = search_file_iname(build_dir_caravel_path, "openlane")
+    user_proj_example_dir = search_file_iname(
+        build_dir_caravel_path, "user_proj_example"
+    )
+
+    New_top_module_dir = os.path.join(open_lane_dir, "iob_soc_caravel")
+
+    shutil.copyfile(
+        Top_path, source_path_caravel
+    )  # copy the top.v to the source of the verilog
+    required_modules = []
+    temporary_models = []
+    temporary_models2 = []
+    temporary_models3 = []
+    if not os.path.exists(New_top_module_dir):
+        os.makedirs(New_top_module_dir)
+        print(f"Directory '{New_top_module_dir}' created.")
+        # Copy contents of user_proj_example to temporary_dir
+        for item in os.listdir(user_proj_example_dir):
+            s = os.path.join(user_proj_example_dir, item)
+            d = os.path.join(New_top_module_dir, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d, symlinks=True)
+            else:
+                shutil.copy2(s, d)
+
+    iob_soc_src_path = os.path.join(build_dir_path, "hardware", "src")
+    temporary_models = find_module_instantiations(source_path_caravel)
+    required_modules = temporary_models + find_includes_vh(source_path_caravel)
+    while temporary_models != []:
+        temporary_models3 = []
+        for verilog_names in temporary_models:
+            destination_file_path = os.path.join(iob_soc_src_path, verilog_names)
+            # search any new instatiated module in the verilog file
+            temporary_models2 = find_module_instantiations(
+                destination_file_path
+            ) + find_includes_vh(destination_file_path)
+            # verify if there is any repeated modules
+            for verilog_names2 in temporary_models2:
+                for verilog_names3 in required_modules:
+                    if verilog_names2 == verilog_names3:
+                        temporary_models2.remove(verilog_names2)
+            temporary_models3 = temporary_models3 + temporary_models2
+            required_modules = required_modules + temporary_models2
+        temporary_models = temporary_models3
+
+    json_temp = os.path.join(New_top_module_dir, "config.json")
+    if os.path.exists(json_temp):
+        with open(json_temp, "r") as json_file:
+            data = json.load(json_file)
+            data["DESIGN_NAME"] = "iob_soc_caravel"
+            data["VERILOG_FILES"] = [
+                file
+                for file in data["VERILOG_FILES"]
+                if "user_proj_example.v" not in file
+            ]
+            data["VERILOG_FILES"].append(source_path_caravel)
+            for verig in required_modules:
+                temp = os.path.join(iob_soc_src_path, verig)
+                data["VERILOG_FILES"].append(temp)
+            # Add or modify the SYNTH_BUFFERING entry
+            data["SYNTH_BUFFERING"] = 1
+        with open(json_temp, "w") as json_file:
+            json.dump(data, json_file, indent=4)
 
 
 """
