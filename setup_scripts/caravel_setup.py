@@ -31,13 +31,33 @@ def find_includes(file_path):
         return matches
 
 
+def search_algoritm(
+    start_dir, name
+):  # a simple search algorithm that does not enter the .git folder
+    for foldername, subfolders, filenames in os.walk(start_dir):
+        if ".git" in subfolders:
+            subfolders.remove(".git")  # Exclude the .git folder from the search
+        if name in subfolders:
+            return os.path.abspath(os.path.join(foldername, name))
+    return None
+
+
+# need to be run with the build dir name
 if len(sys.argv) >= 2:
     build_dir = sys.argv[1]
-    print(build_dir)
+    print(build_dir_name)
 else:
     print("Please provide two arguments.")
     sys.exit(1)  # Exiting with a non-zero code signifies an error condition
 
+current_dir = os.getcwd()  # gets current directory
+CARAVEL_source_path = search_algoritm(current_dir,"CARAVEL") #gets the submodule path
+build_dir_directory = search_algoritm(os.path.dirname(current_dir),os.path.basename(build_dir_name)) #gets the full name to the build dir
+
+
+
+
+"""
 build_dir = os.path.abspath(build_dir)
 # Check if the directory exists
 if not os.path.exists(build_dir):
@@ -152,3 +172,4 @@ if os.path.exists(source_path):
             data["SYNTH_BUFFERING"] = 1
             with open(json_temp, "w") as json_file:
                 json.dump(data, json_file, indent=4)
+"""
