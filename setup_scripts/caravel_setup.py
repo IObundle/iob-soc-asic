@@ -44,17 +44,34 @@ def search_algoritm(
 
 # need to be run with the build dir name
 if len(sys.argv) >= 2:
-    build_dir = sys.argv[1]
+    build_dir_name = sys.argv[1]
     print(build_dir_name)
 else:
     print("Please provide two arguments.")
     sys.exit(1)  # Exiting with a non-zero code signifies an error condition
 
 current_dir = os.getcwd()  # gets current directory
-CARAVEL_source_path = search_algoritm(current_dir,"CARAVEL") #gets the submodule path
-build_dir_directory = search_algoritm(os.path.dirname(current_dir),os.path.basename(build_dir_name)) #gets the full name to the build dir
+CARAVEL_source_path = search_algoritm(current_dir, "CARAVEL")  # gets the submodule path
+build_dir_directory = os.path.join(search_algoritm(
+    os.path.dirname(current_dir), os.path.basename(build_dir_name)
+),"CARAVEL")  # gets the full path to the build dir
 
 
+try:
+    # Ensure that the source directory exists
+    if os.path.exists(CARAVEL_source_path):
+        # Check if the target directory already exists
+        if not os.path.exists(build_dir_directory):
+            shutil.copytree(CARAVEL_source_path, build_dir_directory)
+            print(f"Directory '{CARAVEL_source_path}' copied to '{build_dir_directory}'")
+        else:
+            print(f"Directory '{build_dir_directory}' already exists.")
+    else:
+        print(f"Source directory '{CARAVEL_source_path}' does not exist.")
+except shutil.Error as e:
+    print(f"Error: {e}")
+except OSError as e:
+    print(f"Error: {e}")
 
 
 """
