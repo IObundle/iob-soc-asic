@@ -1,9 +1,7 @@
 # IOb-SoC-SUT
 
-IOb-SoC-SUT is a generic RISC-V SoC, based on [IOb-SoC](https://github.com/IObundle/iob-soc), used for verification by the [OpenCryptoTester](https://nlnet.nl/project/OpenCryptoTester#ack) project.
-This repository contains an example System Under Test (SUT) and a Tester to verify it. The SUT is used to demonstrate the Tester's abilities for verification purposes.
+IOb-SoC-Caravel is a generic RISC-V SoC, based on [IOb-SoC](https://github.com/IObundle/iob-soc), used design process using open source tools project.
 
-The SUT runs on bare metal and has UART, GPIO, AXI4-Stream, and IOb-native interfaces.
 
 # [OpenCryptoTester](https://nlnet.nl/project/OpenCryptoTester#ack)
 

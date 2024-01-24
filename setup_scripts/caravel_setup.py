@@ -23,7 +23,7 @@ def find_module_instantiations(verilog_file_path):
     return list(module_names)
 
 
-def find_includes(file_path):
+def find_includes_vh(file_path):
     with open(file_path, "r") as file:
         verilog_code = file.read()
         include_pattern = re.compile(r'`include\s+"([^"]+)"')
@@ -31,124 +31,123 @@ def find_includes(file_path):
         return matches
 
 
+def search_file_iname(
+    start_dir, name
+):  # a simple search algorithm that does not enter the .git folder
+    for foldername, subfolders, filenames in os.walk(start_dir):
+        if ".git" in subfolders:
+            subfolders.remove(".git")  # Exclude the .git folder from the search
+        if name in subfolders or name in filenames:
+            return os.path.abspath(os.path.join(foldername, name))
+    return None
+
+
+# need to be run with the build dir name
 if len(sys.argv) >= 2:
-    build_dir = sys.argv[1]
-    print(build_dir)
+    build_dir_name = sys.argv[1]
+    print(build_dir_name)
 else:
     print("Please provide two arguments.")
     sys.exit(1)  # Exiting with a non-zero code signifies an error condition
 
-build_dir = os.path.abspath(build_dir)
-# Check if the directory exists
-if not os.path.exists(build_dir):
-    print(f"The directory '{build_dir}' does not exist. Exiting.")
-    sys.exit(1)  # Exit with a non-zero status code indicating an error
-source_path = os.path.join(os.getcwd(), "submodules", "caravel_project")
-target_path = os.path.join(build_dir, "caravel_project")
-
-try:
-    # Ensure that the source directory exists
-    if os.path.exists(source_path):
-        # Check if the target directory already exists
-        if not os.path.exists(target_path):
-            shutil.copytree(source_path, target_path)
-            print(f"Directory '{source_path}' copied to '{target_path}'")
+build_dir_caravel_path = None
+current_dir = os.getcwd()  # gets current directory
+CARAVEL_source_path = search_file_iname(
+    current_dir, "CARAVEL"
+)  # gets the submodule path
+build_dir_path = search_file_iname(
+    os.path.dirname(current_dir), os.path.basename(build_dir_name)
+)  # gets the full path to the build dir
+if os.path.exists(str(build_dir_path)):
+    build_dir_caravel_path = os.path.join(
+        build_dir_path, "CARAVEL"
+    )  # get the new $Build_dir_path/CARAVEL path
+    # copy CARAVEL submodule to build dir
+    try:
+        # Ensure that the source directory exists
+        if os.path.exists(str(build_dir_path)):
+            # Check if the target directory already exists
+            if not os.path.exists(build_dir_caravel_path):
+                shutil.copytree(CARAVEL_source_path, build_dir_caravel_path)
+                print(
+                    f"Directory '{CARAVEL_source_path}' copied to '{build_dir_caravel_path}'"
+                )
+            else:
+                print(f"Directory '{build_dir_directory}' already exists.")
         else:
-            print(f"Directory '{target_path}' already exists.")
-    else:
-        print(f"Source directory '{source_path}' does not exist.")
-except shutil.Error as e:
-    print(f"Error: {e}")
-except OSError as e:
-    print(f"Error: {e}")
+            print(f"Source directory '{build_dir_path}' does not exist.")
+    except shutil.Error as e:
+        print(f"Error: {e}")
+    except OSError as e:
+        print(f"Error: {e}")
+    Top_path = search_file_iname(
+        current_dir, "iob_soc_caravel.v"
+    )  # gets the top_module
+    source_path_caravel = os.path.join(
+        os.path.dirname(search_file_iname(build_dir_caravel_path, "defines.v")),
+        "iob_soc_caravel.v",
+    )
+    open_lane_dir = search_file_iname(build_dir_caravel_path, "openlane")
+    user_proj_example_dir = search_file_iname(
+        build_dir_caravel_path, "user_proj_example"
+    )
 
-source_path = os.path.join(os.getcwd(), "hardware", "caravel", "src")
-target_path = os.path.join(target_path, "verilog", "rtl")
-open_lane_dir = os.path.join(build_dir, "caravel_project", "openlane")
-user_proj_dir = os.path.join(open_lane_dir, "user_proj_example")
+    New_top_module_dir = os.path.join(open_lane_dir, "iob_soc_caravel")
 
+    shutil.copyfile(
+        Top_path, source_path_caravel
+    )  # copy the top.v to the source of the verilog
+    required_modules = []
+    temporary_models = []
+    temporary_models2 = []
+    temporary_models3 = []
+    if not os.path.exists(New_top_module_dir):
+        os.makedirs(New_top_module_dir)
+        print(f"Directory '{New_top_module_dir}' created.")
+        # Copy contents of user_proj_example to temporary_dir
+        for item in os.listdir(user_proj_example_dir):
+            s = os.path.join(user_proj_example_dir, item)
+            d = os.path.join(New_top_module_dir, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d, symlinks=True)
+            else:
+                shutil.copy2(s, d)
 
-required_modules = []
-temporary_models = []
-temporary_models2 = []
-temporary_models3 = []
+    iob_soc_src_path = os.path.join(build_dir_path, "hardware", "src")
+    temporary_models = find_module_instantiations(source_path_caravel)
+    required_modules = temporary_models + find_includes_vh(source_path_caravel)
+    while temporary_models != []:
+        temporary_models3 = []
+        for verilog_names in temporary_models:
+            destination_file_path = os.path.join(iob_soc_src_path, verilog_names)
+            # search any new instatiated module in the verilog file
+            temporary_models2 = find_module_instantiations(
+                destination_file_path
+            ) + find_includes_vh(destination_file_path)
+            # verify if there is any repeated modules
+            for verilog_names2 in temporary_models2:
+                for verilog_names3 in required_modules:
+                    if verilog_names2 == verilog_names3:
+                        temporary_models2.remove(verilog_names2)
+            temporary_models3 = temporary_models3 + temporary_models2
+            required_modules = required_modules + temporary_models2
+        temporary_models = temporary_models3
 
-
-if os.path.exists(source_path):
-    v_top_modules = [file for file in os.listdir(source_path) if file.endswith(".v")]
-    print("hamburgues")
-    # Copy each '.v' file from source_path to target_path
-    for file_name in v_top_modules:
-
-        source_file = os.path.join(source_path, file_name)
-        target_file = os.path.join(target_path, file_name)
-        shutil.copyfile(source_file, target_file)
-        module_name = os.path.splitext(file_name)[0]
-
-        temporary_dir = os.path.join(open_lane_dir, module_name)
-        iob_soc_src_path = os.path.join(build_dir, "hardware", "src")
-        iob_bp = os.path.join(build_dir, "hardware", "simulation", "src")
-
-        if not os.path.exists(temporary_dir):
-            os.makedirs(temporary_dir)
-            print(f"Directory '{temporary_dir}' created.")
-            # Copy contents of user_proj_example to temporary_dir
-            for item in os.listdir(user_proj_dir):
-                s = os.path.join(user_proj_dir, item)
-                d = os.path.join(temporary_dir, item)
-                if os.path.isdir(s):
-                    shutil.copytree(s, d, symlinks=True)
-                else:
-                    shutil.copy2(s, d)
-
-        # v_files_sim = [
-        #    file for file in os.listdir(iob_bp) if file.endswith((".v", ".vh"))
-        # ]
-
-        # for file_name in v_files_sim:
-        #    source_file_path = os.path.join(iob_bp, file_name)
-        #    destination_file_path = os.path.join(iob_soc_src_path, file_name)
-        #    # Copy the file from source to destination
-        #    shutil.copy(source_file_path, destination_file_path)
-
-        temporary_models = find_module_instantiations(target_file)
-        required_modules = temporary_models + find_includes(target_file)
-
-        while temporary_models != []:
-            temporary_models3 = []
-            for verilog_names in temporary_models:
-                destination_file_path = os.path.join(iob_soc_src_path, verilog_names)
-
-                # search any new instatiated module in the verilog file
-                temporary_models2 = find_module_instantiations(
-                    destination_file_path
-                ) + find_includes(destination_file_path)
-                # verify if there is any repeated modules
-                for verilog_names2 in temporary_models2:
-                    for verilog_names3 in required_modules:
-                        if verilog_names2 == verilog_names3:
-                            temporary_models2.remove(verilog_names2)
-
-                temporary_models3 = temporary_models3 + temporary_models2
-                required_modules = required_modules + temporary_models2
-
-            temporary_models = temporary_models3
-
-        json_temp = os.path.join(temporary_dir, "config.json")
-        if os.path.exists(json_temp):
-            with open(json_temp, "r") as json_file:
-                data = json.load(json_file)
-                data["DESIGN_NAME"] = module_name
-                data["VERILOG_FILES"] = [
-                    file
-                    for file in data["VERILOG_FILES"]
-                    if "user_proj_example.v" not in file
-                ]
-            data["VERILOG_FILES"].append(target_file)
+    json_temp = os.path.join(New_top_module_dir, "config.json")
+    if os.path.exists(json_temp):
+        with open(json_temp, "r") as json_file:
+            data = json.load(json_file)
+            data["DESIGN_NAME"] = "iob_soc_caravel"
+            data["VERILOG_FILES"] = [
+                file
+                for file in data["VERILOG_FILES"]
+                if "user_proj_example.v" not in file
+            ]
+            data["VERILOG_FILES"].append(source_path_caravel)
             for verig in required_modules:
                 temp = os.path.join(iob_soc_src_path, verig)
                 data["VERILOG_FILES"].append(temp)
             # Add or modify the SYNTH_BUFFERING entry
             data["SYNTH_BUFFERING"] = 1
-            with open(json_temp, "w") as json_file:
-                json.dump(data, json_file, indent=4)
+        with open(json_temp, "w") as json_file:
+            json.dump(data, json_file, indent=4)
