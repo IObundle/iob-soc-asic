@@ -4,3 +4,9 @@
 [submodule "submodules/IOBSOC"]
 	path = submodules/IOBSOC
 	url = git@github.com:IObundle/iob-soc.git
+[submodule "submodules/CARAVEL"]
+	path = submodules/CARAVEL
+	url = git@github.com:IObundle/caravel_project.git
+[submodule "submodules/OSAD"]
+	path = submodules/OSAD
+	url = git@github.com:Vasco-Luz/OSAD.git
