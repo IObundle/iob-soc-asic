@@ -37,7 +37,7 @@ def search_algoritm(
     for foldername, subfolders, filenames in os.walk(start_dir):
         if ".git" in subfolders:
             subfolders.remove(".git")  # Exclude the .git folder from the search
-        if name in subfolders:
+        if name in subfolders or name in filenames:
             return os.path.abspath(os.path.join(foldername, name))
     return None
 
@@ -50,28 +50,42 @@ else:
     print("Please provide two arguments.")
     sys.exit(1)  # Exiting with a non-zero code signifies an error condition
 
+build_dir_caravel_path = None
 current_dir = os.getcwd()  # gets current directory
 CARAVEL_source_path = search_algoritm(current_dir, "CARAVEL")  # gets the submodule path
-build_dir_directory = os.path.join(search_algoritm(
+build_dir_path = search_algoritm(
     os.path.dirname(current_dir), os.path.basename(build_dir_name)
-),"CARAVEL")  # gets the full path to the build dir
-
-
-try:
-    # Ensure that the source directory exists
-    if os.path.exists(CARAVEL_source_path):
-        # Check if the target directory already exists
-        if not os.path.exists(build_dir_directory):
-            shutil.copytree(CARAVEL_source_path, build_dir_directory)
-            print(f"Directory '{CARAVEL_source_path}' copied to '{build_dir_directory}'")
+)  # gets the full path to the build dir
+if os.path.exists(str(build_dir_path)):
+    build_dir_caravel_path = os.path.join(
+        build_dir_path, "CARAVEL"
+    )  # get the new $Build_dir_path/CARAVEL path
+    # copy CARAVEL submodule to build dir
+    try:
+        # Ensure that the source directory exists
+        if os.path.exists(str(build_dir_path)):
+            # Check if the target directory already exists
+            if not os.path.exists(build_dir_caravel_path):
+                shutil.copytree(CARAVEL_source_path, build_dir_caravel_path)
+                print(
+                    f"Directory '{CARAVEL_source_path}' copied to '{build_dir_caravel_path}'"
+                )
+            else:
+                print(f"Directory '{build_dir_directory}' already exists.")
         else:
-            print(f"Directory '{build_dir_directory}' already exists.")
-    else:
-        print(f"Source directory '{CARAVEL_source_path}' does not exist.")
-except shutil.Error as e:
-    print(f"Error: {e}")
-except OSError as e:
-    print(f"Error: {e}")
+            print(f"Source directory '{build_dir_path}' does not exist.")
+    except shutil.Error as e:
+        print(f"Error: {e}")
+    except OSError as e:
+        print(f"Error: {e}")
+    Top_path = search_algoritm(current_dir, "iob_soc_caravel.v")  # gets the top_module
+    source_path_caravel = os.path.dirname(
+        search_algoritm(build_dir_caravel_path, "user_project_wrapper.v")
+    )
+    open_lane_dir = search_algoritm(build_dir_caravel_path, "openlane")
+    user_proj_example_dir = search_algoritm(build_dir_caravel_path, "user_proj_example")
+    print(open_lane_dir)
+    print(user_proj_example_dir)
 
 
 """
