@@ -45,7 +45,7 @@ setup:
 	make build-setup SETUP_ARGS="$(SETUP_ARGS)"
 
 setup_caravel: build_dir_name
-	$(PYTHON_EXEC) $(CARAVEL_LIB)/caravel_setup.py $(BUILD_DIR)
+	$(PYTHON_EXEC) $(CARAVEL_LIB)/iob_soc_caravel_setup.py $(BUILD_DIR)
 
 pc-emul-run: build_dir_name
 	make clean setup && make -C $(BUILD_DIR)/ pc-emul-run
