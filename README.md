@@ -55,7 +55,7 @@ make setup
 make caravel
 ```
 
-Right now the target make caravel is still not implemented(testing phase). But make setup_caravel(a future target of make caravel), checks if the build dir is created, then it setups the CARAVEL. To explain the process it first copies the submodule CARAVEL to the buildir. It then copies the caravel `iob_soc_caravel.v`. Then it creates a new top_module, then it analyses the `iob_soc_caravel.v` and create the needed paths to the verilog modules and includes and define them in a special json file, a file that is used in the flow of caravel.
+Right now the target make caravel is still not implemented(testing phase). But make `setup_caravel` (a future target of make caravel), checks if the build dir is created, then it setups the CARAVEL. To explain the process it first copies the submodule CARAVEL to the buildir. It then copies the caravel `iob_soc_caravel.v`. Then it creates a new top_module, then it analyses the `iob_soc_caravel.v` and create the needed paths to the verilog modules and includes and define them in a special json file, a file that is used in the flow of caravel.
 
 
 
