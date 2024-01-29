@@ -105,30 +105,6 @@ module iob_soc_caravel #(
 
 
 
-//on works
-iob_wishbone2iob #(
-   parameter ADDR_W = 32,
-   parameter DATA_W = 32
-) (
-   .wb_addr_i(wbs_adr_i),
-   .wb_select_i(wbs_sel_i),
-   .wb_we_i(wbs_we_i),
-   .wb_cyc_i(wbs_cyc_i),
-   .wb_stb_i(wb_stb_i),
-   .wb_data_i(wb_data_i),
-   .wb_ack_o(wb_ack_o),
-   .wb_data_o(wb_data_o),
-   //iob port interface
-   .iob_valid_o(),
-   .iob_address_o(),
-   .iob_wdata_o(),
-   .iob_wstrb_o(),
-   .iob_rvalid_i(),
-   .iob_rdata_i(),
-   iob_ready_i()
-);
-
-
 
 
 

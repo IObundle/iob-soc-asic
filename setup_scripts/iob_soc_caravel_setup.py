@@ -42,6 +42,8 @@ def search_file_iname(
     return None
 
 
+Modules_to_instaciate_build_dir = ["wishbone2iob"]
+
 # need to be run with the build dir name
 if len(sys.argv) >= 2:
     build_dir_name = sys.argv[1]
@@ -49,7 +51,6 @@ if len(sys.argv) >= 2:
 else:
     print("Please provide two arguments.")
     sys.exit(1)  # Exiting with a non-zero code signifies an error condition
-
 build_dir_caravel_path = None
 current_dir = os.getcwd()  # gets current directory
 CARAVEL_source_path = search_file_iname(
@@ -80,23 +81,33 @@ if os.path.exists(str(build_dir_path)):
         print(f"Error: {e}")
     except OSError as e:
         print(f"Error: {e}")
-    Top_path = search_file_iname(
-        current_dir, "iob_soc_caravel.v"
-    )  # gets the top_module
+    Top_path = search_file_iname(current_dir, "iob_caravel.v")  # gets the top_module
     source_path_caravel = os.path.join(
         os.path.dirname(search_file_iname(build_dir_caravel_path, "defines.v")),
-        "iob_soc_caravel.v",
+        "iob_caravel.v",
     )
     open_lane_dir = search_file_iname(build_dir_caravel_path, "openlane")
     user_proj_example_dir = search_file_iname(
         build_dir_caravel_path, "user_proj_example"
     )
-
-    New_top_module_dir = os.path.join(open_lane_dir, "iob_soc_caravel")
-
+    New_top_module_dir = os.path.join(open_lane_dir, "iob_caravel")
     shutil.copyfile(
         Top_path, source_path_caravel
     )  # copy the top.v to the source of the verilog
+
+    #automatic isntatitiation in the top dir
+    iob_soc_src_path = os.path.join(build_dir_path, "hardware", "src")
+
+    for _required_mod in Modules_to_instaciate_build_dir:
+        a = 0
+
+
+
+
+
+
+
+    # copy the required modules
     required_modules = []
     temporary_models = []
     temporary_models2 = []
@@ -133,11 +144,12 @@ if os.path.exists(str(build_dir_path)):
             required_modules = required_modules + temporary_models2
         temporary_models = temporary_models3
 
+    # alters the json file to include the json
     json_temp = os.path.join(New_top_module_dir, "config.json")
     if os.path.exists(json_temp):
         with open(json_temp, "r") as json_file:
             data = json.load(json_file)
-            data["DESIGN_NAME"] = "iob_soc_caravel"
+            data["DESIGN_NAME"] = "iob_caravel"
             data["VERILOG_FILES"] = [
                 file
                 for file in data["VERILOG_FILES"]
