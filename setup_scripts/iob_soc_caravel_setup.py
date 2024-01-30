@@ -98,6 +98,8 @@ if os.path.exists(str(build_dir_path)):
     # automatic isntatitiation in the top dir
     iob_soc_src_path = os.path.join(build_dir_path, "hardware", "src")
 
+
+
     for required_mod in Modules_to_instaciate_build_dir:
         mod_path = os.path.join(iob_soc_src_path, required_mod) + ".v"
         with open(mod_path, "r") as file:
@@ -109,10 +111,14 @@ if os.path.exists(str(build_dir_path)):
         module_lines = module_content.splitlines()
         for line in module_lines:
             if ") (" in line:
-                line = ") " + required_mod + " ("
-
+                line = ") " + required_mod +" ("
             new_lines.append(line)
         print(new_lines)
+
+
+
+
+
 
     # copy the required modules
     required_modules = []
