@@ -42,7 +42,7 @@ def search_file_iname(
     return None
 
 
-Modules_to_instaciate_build_dir = ["wishbone2iob"]
+Modules_to_instaciate_build_dir = ["iob_wishbone2iob"]
 
 # need to be run with the build dir name
 if len(sys.argv) >= 2:
@@ -95,17 +95,24 @@ if os.path.exists(str(build_dir_path)):
         Top_path, source_path_caravel
     )  # copy the top.v to the source of the verilog
 
-    #automatic isntatitiation in the top dir
+    # automatic isntatitiation in the top dir
     iob_soc_src_path = os.path.join(build_dir_path, "hardware", "src")
 
-    for _required_mod in Modules_to_instaciate_build_dir:
-        a = 0
+    for required_mod in Modules_to_instaciate_build_dir:
+        mod_path = os.path.join(iob_soc_src_path, required_mod) + ".v"
+        with open(mod_path, "r") as file:
+            file_content = file.read()
+        start_index = file_content.find(required_mod)
+        end_index = file_content.find(");", start_index) + len(");")
+        module_content = file_content[start_index:end_index]
+        new_lines = []
+        module_lines = module_content.splitlines()
+        for line in module_lines:
+            if ") (" in line:
+                line = ") " + required_mod + " ("
 
-
-
-
-
-
+            new_lines.append(line)
+        print(new_lines)
 
     # copy the required modules
     required_modules = []
