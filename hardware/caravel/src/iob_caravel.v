@@ -80,6 +80,17 @@ module iob_soc_caravel #(
    wire [     3:0] wstrb;
    wire [BITS-1:0] la_write;
 
+
+   wire iob_valid_o;
+   wire iob_address_o[31:0];
+   wire iob_wdata_o[31:0];
+   wire iob_wstrb_o[3:0];
+   wire iob_rvalid_i;
+   wire iob_rdata_i[31:0];
+   wire iob_ready_i;
+
+
+
    // WB MI A
    assign valid       = wbs_cyc_i && wbs_stb_i;
    assign wstrb       = wbs_sel_i & {4{wbs_we_i}};
@@ -106,6 +117,32 @@ module iob_soc_caravel #(
 
 
 
+
+iob_wishbone2iob #(
+   .ADDR_W,
+   .DATA_W 
+) iob_wishbone(
+   .clk_i(wb_clk_i),
+   .cke_i(1'b1),
+   // Wishbone interface
+   .arst( wb_rst_i),
+   .wb_addr_i(wbs_adr_i),
+   .wb_select_i(wbs_sel_i),
+   .wb_we_i(wbs_we_i),
+   .wb_cyc_i(wbs_cyc_i),
+   .wb_stb_i(wbs_stb_i),
+   .wb_data_i(wbs_dat_i),
+   .wb_ack_o(wbs_ack_o),
+   .wb_data_o(wbs_dat_o),
+   // iob interface
+   .iob_valid_o(iob_valid_o),
+   .iob_address_o(iob_address_o),
+   .iob_wdata_o(iob_wdata_o),
+   .iob_wstrb_o(iob_wstrb_o),
+   .iob_rvalid_i(iob_rvalid_i),
+   .iob_rdata_i(iob_rdata_i),
+   .iob_ready_i(iob_ready_i)
+);
 
 
 

@@ -9,7 +9,7 @@ DISABLE_LINT:=1
 #endif
 ifneq ($(USE_EXTMEM),1)
 $(warning WARNING: USE_EXTMEM must be set to support iob-soc-opencryptolinux and ethernet with DMA. Auto-adding USE_EXTMEM=1...)
-USE_EXTMEM:=1
+USE_EXTMEM:=0
 endif
 
 LIB_DIR:=submodules/IOBSOC/submodules/LIB
@@ -18,7 +18,7 @@ include $(LIB_DIR)/setup.mk
 CARAVEL_LIB := setup_scripts
 PYTHON_EXEC:=/usr/bin/env python3 -B
 
-INIT_MEM ?= 1
+INIT_MEM = 0
 RUN_LINUX ?= 0
 
 ifeq ($(INIT_MEM),1)
