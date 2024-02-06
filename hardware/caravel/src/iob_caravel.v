@@ -36,7 +36,7 @@
  */
 
 
-module iob_soc_caravel #(
+module iob_caravel #(
    parameter BITS = 16
 ) (
 `ifdef USE_POWER_PINS
@@ -55,23 +55,21 @@ module iob_soc_caravel #(
    input  [31:0] wbs_adr_i,
    output        wbs_ack_o,
    output [31:0] wbs_dat_o,
-
-
-
-
    // Logic Analyzer Signals
-   input  [127:0] la_data_in,
-   output [127:0] la_data_out,
-   input  [127:0] la_oenb,
+   //input  [127:0] la_data_in,
+   //output [127:0] la_data_out,
+   //input  [127:0] la_oenb,
    // IOs
-   input  [BITS-1:0] io_in,
-   output [BITS-1:0] io_out,
-   output [BITS-1:0] io_oeb,
+   //input  [BITS-1:0] io_in,
+   //output [BITS-1:0] io_out,
+   //output [BITS-1:0] io_oeb,
    // IRQ
-   output [2:0] irq
+   //output [2:0] irq
 );
    wire            clk;
    wire            rst;
+   localparam ADDR_W = 32;
+   localparam DATA_W  = 32;
 
    // wire [BITS-1:0] rdata; 
    wire [BITS-1:0] wdata;
@@ -82,50 +80,50 @@ module iob_soc_caravel #(
 
 
    wire iob_valid_o;
-   wire iob_address_o[31:0];
-   wire iob_wdata_o[31:0];
-   wire iob_wstrb_o[3:0];
+   wire [31:0] iob_address_o;
+   wire [31:0] iob_wdata_o;
+   wire [3:0] iob_wstrb_o;
    wire iob_rvalid_i;
-   wire iob_rdata_i[31:0];
+   wire [31:0] iob_rdata_i;
    wire iob_ready_i;
 
 
 
    // WB MI A
-   assign valid       = wbs_cyc_i && wbs_stb_i;
-   assign wstrb       = wbs_sel_i & {4{wbs_we_i}};
+   //assign valid       = wbs_cyc_i && wbs_stb_i;
+   //assign wstrb       = wbs_sel_i & {4{wbs_we_i}};
    //assign wbs_dat_o = {{(32-BITS){1'b0}}, rdata};
-   assign wdata       = wbs_dat_i[BITS-1:0];
-   assign wbs_dat_o   = 0;
-   assign wbs_ack_o   = 0;
+   //assign wdata       = wbs_dat_i[BITS-1:0];
+   //assign wbs_dat_o   = 0;
+   //assign wbs_ack_o   = 0;
 
    // IO
-   assign io_out      = count;
-   assign io_oeb      = {(BITS) {rst}};
+   //assign io_out      = count;
+   //assign io_oeb      = {(BITS) {rst}};
 
    // IRQ
-   assign irq         = 3'b000;  // Unused
+   //assign irq         = 3'b000;  // Unused
 
    // LA
-   assign la_data_out = {{(128 - BITS) {1'b0}}, count};
+   //assign la_data_out = {{(128 - BITS) {1'b0}}, count};
    // Assuming LA probes [63:32] are for controlling the count register  
-   assign la_write    = ~la_oenb[63:64-BITS] & ~{BITS{valid}};
+   //assign la_write    = ~la_oenb[63:64-BITS] & ~{BITS{valid}};
    // Assuming LA probes [65:64] are for controlling the count clk & reset  
-   assign clk         = wb_clk_i;
-   assign rst         = wb_rst_i;
+   //assign clk         = wb_clk_i;
+   //assign rst         = wb_rst_i;
 
 
 
 
 
 iob_wishbone2iob #(
-   .ADDR_W,
-   .DATA_W 
+   .ADDR_W(ADDR_W),
+   .DATA_W(DATA_W) 
 ) iob_wishbone(
    .clk_i(wb_clk_i),
    .cke_i(1'b1),
    // Wishbone interface
-   .arst( wb_rst_i),
+   .arst_i(wb_rst_i),
    .wb_addr_i(wbs_adr_i),
    .wb_select_i(wbs_sel_i),
    .wb_we_i(wbs_we_i),
@@ -144,6 +142,14 @@ iob_wishbone2iob #(
    .iob_ready_i(iob_ready_i)
 );
 
+
+
+iob_soc_caravel #(
+
+
+) (
+
+);
 
 
 endmodule
