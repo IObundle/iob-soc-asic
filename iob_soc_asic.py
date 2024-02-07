@@ -11,7 +11,7 @@ from iob_ram_2p_be import iob_ram_2p_be
 from verilog_tools import insert_verilog_in_module
 from mk_configuration import append_str_config_build_mk
 
-caravel_regs = [
+asic_regs = [
     {
         "name": "regfileif",
         "descr": "REGFILEIF software accessible registers.",
@@ -59,15 +59,15 @@ caravel_regs = [
                 "rst_val": 0,
                 "log2n_items": 0,
                 "autoreg": True,
-                "descr": "Read register 32 bit. In this example, we use this to pass the caravelMemoryMessage address.",
+                "descr": "Read register 32 bit. In this example, we use this to pass the asicMemoryMessage address.",
             },
         ],
     }
 ]
 
 
-class iob_soc_caravel(iob_soc):
-    name = "iob_soc_caravel"
+class iob_soc_asic(iob_soc):
+    name = "iob_soc_asic"
     version = "V0.70"
     flows = "pc-emul emb sim doc fpga"
     setup_dir = os.path.dirname(__file__)
@@ -88,7 +88,7 @@ class iob_soc_caravel(iob_soc):
     @classmethod
     def _specific_setup(cls):
         """Method that runs the setup process of this class"""
-        # Instantiate caravel peripherals
+        # Instantiate iob_soc_asic peripherals
         cls.peripherals.append(
             iob_regfileif_custom(
                 "REGFILEIF0",
@@ -124,15 +124,13 @@ class iob_soc_caravel(iob_soc):
     @classmethod
     def _generate_files(cls):
         super()._generate_files()
-        # Remove iob_soc_caravel_swreg_gen.v as it is not used
-        os.remove(
-            os.path.join(cls.build_dir, "hardware/src/iob_soc_caravel_swreg_gen.v")
-        )
+        # Remove iob_soc_asic_swreg_gen.v as it is not used
+        os.remove(os.path.join(cls.build_dir, "hardware/src/iob_soc_asic_swreg_gen.v"))
         # Connect unused peripheral inputs
         insert_verilog_in_module(
             """
              """,
-            cls.build_dir + "/hardware/src/iob_soc_caravel.v",
+            cls.build_dir + "/hardware/src/iob_soc_asic.v",
         )
         # Update sim_wrapper connections
         if cls.is_top_module:
@@ -140,13 +138,13 @@ class iob_soc_caravel(iob_soc):
                 """
 `include "iob_regfileif_inverted_swreg_def.vh"
    wire [1-1:0] iob_valid_i = 1'b0;
-   wire [`IOB_SOC_CARAVEL_REGFILEIF0_ADDR_W-1:0] iob_addr_i = `IOB_SOC_CARAVEL_REGFILEIF0_ADDR_W'h0;
-   wire [`IOB_SOC_CARAVEL_REGFILEIF0_DATA_W-1:0] iob_wdata_i = `IOB_SOC_CARAVEL_REGFILEIF0_DATA_W'h0;
-   wire [(`IOB_SOC_CARAVEL_REGFILEIF0_DATA_W/8)-1:0] iob_wstrb_i = `IOB_SOC_CARAVEL_REGFILEIF0_DATA_W / 8'h0;
+   wire [`IOB_SOC_ASIC_REGFILEIF0_ADDR_W-1:0] iob_addr_i = `IOB_SOC_ASIC_REGFILEIF0_ADDR_W'h0;
+   wire [`IOB_SOC_ASIC_REGFILEIF0_DATA_W-1:0] iob_wdata_i = `IOB_SOC_ASIC_REGFILEIF0_DATA_W'h0;
+   wire [(`IOB_SOC_ASIC_REGFILEIF0_DATA_W/8)-1:0] iob_wstrb_i = `IOB_SOC_ASIC_REGFILEIF0_DATA_W / 8'h0;
                 """,
                 cls.build_dir
-                + "/hardware/simulation/src/iob_soc_caravel_sim_wrapper.v",  # Name of the system file to generate the probe wires
-                after_line="iob_soc_caravel_wrapper_pwires.vs",
+                + "/hardware/simulation/src/iob_soc_asic_sim_wrapper.v",  # Name of the system file to generate the probe wires
+                after_line="iob_soc_asic_wrapper_pwires.vs",
             )
             insert_verilog_in_module(
                 """
@@ -156,8 +154,8 @@ class iob_soc_caravel(iob_soc):
       .iob_wstrb_i (iob_wstrb_i),
                 """,
                 cls.build_dir
-                + "/hardware/simulation/src/iob_soc_caravel_sim_wrapper.v",  # Name of the system file to generate the probe wires
-                after_line="iob_soc_caravel0",
+                + "/hardware/simulation/src/iob_soc_asic_sim_wrapper.v",  # Name of the system file to generate the probe wires
+                after_line="iob_soc_asic0",
             )
         # DEBUG: Set ethernet MAC address
         if cls.is_top_module:
@@ -184,7 +182,7 @@ endif
     @classmethod
     def _init_attributes(cls):
         super()._init_attributes()
-        cls.regs = caravel_regs
+        cls.regs = asic_regs
 
     @classmethod
     def _setup_confs(cls):
@@ -211,9 +209,9 @@ endif
         )
 
 
-# Custom iob_regfileif subclass for use in caravel system
+# Custom iob_regfileif subclass for use in asic system
 class iob_regfileif_custom(iob_regfileif):
     @classmethod
     def _init_attributes(cls):
         super()._init_attributes()
-        cls.regs = copy.deepcopy(caravel_regs)
+        cls.regs = copy.deepcopy(asic_regs)
